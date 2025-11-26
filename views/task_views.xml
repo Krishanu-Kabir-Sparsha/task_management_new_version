@@ -1,0 +1,633 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Updated Time Log Form View with HTML -->
+    <record id="view_task_timesheet_line_form" model="ir.ui.view">
+        <field name="name">task.timesheet.line.form</field>
+        <field name="model">task.timesheet.line</field>
+        <field name="arch" type="xml">
+            <form string="Log Time Entry">
+                <sheet>
+                    <div class="alert alert-info" role="alert">
+                        <strong>💡 Tip:</strong> Plan your time first, then log actual hours. Track progress with status updates.
+                    </div>
+                    <group>
+                        <group>
+                            <field name="task_id" readonly="1"/>
+                            <field name="subtask_id" 
+                                required="1"
+                                options="{'no_open': True}"
+                                domain="[('parent_task_id', '=', task_id)]"
+                                context="{'default_parent_task_id': task_id}"/>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="date"/>
+                        </group>
+                        <group>
+                            <field name="status" widget="radio"/>
+                            <field name="planned_hours" widget="float_time" string="Planned Time"/>
+                            <field name="unit_amount" widget="float_time" string="Actual Time Logged"/>
+                            <field name="remaining_hours" widget="float_time" string="Remaining" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="name" widget="html" 
+                            placeholder="Describe what you worked on..."
+                            options="{'collaborative': true, 'resizable': true, 'style-inline': true}"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Save" class="btn-primary" special="save" data-hotkey="s"/>
+                    <button string="Discard" class="btn-secondary" special="cancel" data-hotkey="z"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Individual Task Form View - Complete Updated -->
+    <record id="view_individual_task_form" model="ir.ui.view">
+        <field name="name">individual.task.form</field>
+        <field name="model">task.management</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <form string="Personal Task" class="o_task_form">
+                <header>
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" statusbar_visible=""/>
+                </header>
+                <sheet>
+                    <field name="task_type" invisible="1"/>
+                    <field name="user_id" invisible="1"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_subtasks" type="object" class="oe_stat_button" icon="fa-tasks" invisible="subtask_count == 0">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="subtask_completed_count"/> / <field name="subtask_count"/>
+                                </span>
+                                <span class="o_stat_text">Subtasks</span>
+                            </div>
+                        </button>
+                        <!-- <button name="action_view_timesheets" type="object" class="oe_stat_button" icon="fa-clock-o">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="total_logged_hours" widget="float_time"/>
+                                </span>
+                                <span class="o_stat_text">Actual Time Logged</span>
+                            </div>
+                        </button> -->
+                    </div>
+                    
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="active == True"/>
+                    
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="What needs to be done?" class="o_task_name"/>
+                        </h1>
+                        <h3>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" placeholder="Add tags..."/>
+                        </h3>
+                    </div>
+                    
+                    <group>
+                        <group string="Task Details">
+                            <field name="priority" widget="priority"/>
+                            <field name="user_id" widget="many2one_avatar_user" string="Delegated To"/>
+                            <field name="date_start" string="Start Date" widget="date"/>
+                            <field name="date_deadline" string="End Date" widget="date"/>
+                        </group>
+                        
+                        <!-- HIGH LEVEL TIME TRACKING -->
+                        <group string="Time &amp; Resources (For Tasks)">
+                            <label for="planned_hours" string="Planned Time"/>
+                            <div class="o_row">
+                                <field name="planned_hours" widget="float_time" class="oe_inline"/>
+                                <span class="oe_inline">
+                                    (<field name="task_progress" readonly="1" class="oe_inline" 
+                                            decoration-danger="task_progress &gt; 100"
+                                            decoration-muted="task_progress &lt;= 100"/>%)
+                                </span>
+                            </div>
+                            <field name="effective_hours" widget="float_time" string="Actual Time"/>
+                            <field name="remaining_hours" widget="float_time" string="Time Remaining" readonly="1"/>
+                            <field name="task_performance" widget="badge" string="Performance" readonly="1"
+                                help="Performance indicator. Over Estimated (Green): Finished faster than planned. On Track (Yellow): Using 80-100% of planned time. Under Estimated (Red): Taking more time than planned."
+                                decoration-success="task_performance == 'over_estimated'"
+                                decoration-warning="task_performance == 'on_track'"
+                                decoration-danger="task_performance == 'under_estimated'"
+                                decoration-muted="task_performance == 'not_started'"/>
+                            <div class="o_row" invisible="planned_hours == 0">
+                                <field name="task_progress" widget="progressbar" nolabel="1"
+                                    options="{'hide_text': true, 'editable': false}"
+                                    class="flex-grow-1"/>
+                            </div>
+                        </group>
+                    </group>
+                    
+                    <!-- CHANGE TRACKING SECTION - HIGH LEVEL -->
+                    <group string="📊 Planned Time Change Tracking" invisible="planned_hours_change_count == 0">
+                        <group>
+                            <field name="planned_hours_change_count" string="Changes Made" readonly="1"/>
+                            <field name="planned_hours_last_changed" string="Last Changed" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="planned_hours_changed_by" string="Changed By" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="📝 Description" name="description">
+                            <field name="description" widget="html" placeholder="Describe what needs to be done in detail..." options="{'collaborative': true, 'resizable': true}"/>
+                        </page>
+                        
+                        <!-- <page string="✅ Checklist" name="checklist">
+                            <field name="checklist_items" 
+                                widget="html" 
+                                placeholder="Create your checklist with formatting:&#10;• Step 1: ...&#10;• Step 2: ...&#10;• Step 3: ..." 
+                                options="{'collaborative': true, 'resizable': true, 'safe': true}"/>
+                        </page> -->
+                        
+                        <page string="📋 Subtasks" name="subtasks">
+                            <field name="subtask_ids" context="{'default_parent_task_id': id}">
+                                <list editable="bottom" decoration-success="is_done">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="is_done" widget="boolean_toggle"/>
+                                    <field name="name" string="Subtask"/>
+                                    <field name="user_ids" widget="many2many_tags" 
+                                        options="{'no_create': True}" 
+                                        string="Assigned To"
+                                        domain="[('share', '=', False)]"/>
+                                    <field name="deadline" string="End Date"/>
+                                    <field name="description" string="Notes" widget="html" 
+                                        options="{'style-inline': true}"/>
+                                </list>
+                            </field>
+                        </page>
+                        
+                        <!-- TIME LOGS WITH DETAILED TRACKING -->
+                        <page string="⏱️ Time Logs" name="timesheets">
+                            <!-- ONLY Performance & Progress Bar - Calculated from table entries -->
+                            <group string="⏱️ Time &amp; Resources (For Subtasks)" col="2">
+                                <field name="timesheet_performance" widget="badge" string="Performance" readonly="1"
+                                    help="Calculated from sum of time log entries.  Over Estimated (Green): Total logged less than planned. On Track (Yellow): Using 80-100%.  Under Estimated (Red): Total logged more than planned."
+                                    decoration-success="timesheet_performance == 'over_estimated'"
+                                    decoration-warning="timesheet_performance == 'on_track'"
+                                    decoration-danger="timesheet_performance == 'under_estimated'"
+                                    decoration-muted="timesheet_performance == 'not_started'"/>
+                                <div class="o_row">
+                                    <field name="timesheet_progress" widget="progressbar" nolabel="1"
+                                        options="{'hide_text': false, 'editable': false}"
+                                        class="flex-grow-1"/>
+                                </div>
+                            </group>
+                            
+                            
+                            <!-- TIME LOG TABLE -->
+                            <field name="timesheet_ids" context="{'default_task_id': id, 'default_user_id': uid}">
+                                <list editable="bottom" create="true" delete="true" 
+                                    decoration-success="status == 'done'" 
+                                    decoration-info="status == 'in_review'">
+                                    <field name="date" string="📅 Date" required="1"/>
+                                    <field name="subtask_id" 
+                                        string="📋 Subtask" 
+                                        required="1"
+                                        options="{'no_open': True}"
+                                        domain="[('parent_task_id', '=', parent. id)]"
+                                        context="{'default_parent_task_id': parent.id}"/>
+                                    <field name="name" string="📝 Description" required="1" 
+                                        widget="html" 
+                                        options="{'style-inline': true}"/>
+                                    <field name="status" string="📊 Status" widget="badge"
+                                        decoration-success="status == 'done'"
+                                        decoration-info="status == 'in_review'"
+                                        decoration-warning="status == 'in_progress'"/>
+                                    <field name="planned_hours" widget="float_time" string="⏰ Planned Time" sum="Total Planned"/>
+                                    <field name="unit_amount" widget="float_time" string="⏱️ Actual Time Logged" required="1" sum="Total Logged"/>
+                                    <field name="remaining_hours" widget="float_time" string="⏳ Remaining" sum="Total Remaining"
+                                        decoration-danger="remaining_hours &lt; 0"
+                                        decoration-success="remaining_hours &gt;= 0"/>
+                                    <button name="action_edit_time_log" type="object" string="✏️ Edit" icon="fa-edit" class="btn-link"/>
+                                </list>
+                            </field>
+                            <div class="alert alert-info mb-3" role="alert">
+                                <strong>💡 How it works:</strong> 
+                                <ul class="mb-0">
+                                    <li>Each time log entry has its own Planned Time and Actual Time Logged</li>
+                                    <li>Performance and Progress are calculated from the <strong>sum of all entries above</strong></li>
+                                    <li>Subtask selection is required - you can create new subtasks on the Time Logs as well</li>
+                                    <li>Track status per entry: In Progress, In Review, or Done</li>
+                                </ul>
+                            </div>
+                        </page>
+                        
+                        <page string="📝 Notes" name="notes">
+                            <field name="notes" 
+                                widget="html" 
+                                placeholder="Add any additional notes, links, or comments here..." 
+                                options="{'collaborative': true, 'resizable': true, 'safe': true}"/>
+                        </page>
+                        
+                        <!-- HISTORY TABS -->
+                        <!-- <page string="📜 Planned Time History" name="planned_history" invisible="not planned_hours_history">
+                            <group>
+                                <field name="planned_hours_history" widget="text" readonly="1" nolabel="1"/>
+                            </group>
+                        </page> -->
+                        
+                        <!-- <page string="📜 Subtasks Planned History" name="timesheet_history" invisible="not timesheet_planned_history">
+                            <group>
+                                <field name="timesheet_planned_history" widget="text" readonly="1" nolabel="1"/>
+                            </group>
+                        </page> -->
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Team Task Form View - Complete Updated -->
+    <record id="view_team_task_form" model="ir.ui.view">
+        <field name="name">team.task.form</field>
+        <field name="model">task.management</field>
+        <field name="priority">21</field>
+        <field name="arch" type="xml">
+            <form string="Team Task" class="o_task_form">
+                <header>
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" statusbar_visible=""/>
+                </header>
+                <sheet>
+                    <field name="task_type" invisible="1"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_subtasks" type="object" class="oe_stat_button" icon="fa-tasks">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="subtask_count"/>
+                                </span>
+                                <span class="o_stat_text">Subtasks</span>
+                            </div>
+                        </button>
+                        <!-- <button name="action_view_timesheets" type="object" class="oe_stat_button" icon="fa-users">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="total_logged_hours" widget="float_time"/>
+                                </span>
+                                <span class="o_stat_text">Actual Time Logged</span>
+                            </div>
+                        </button> -->
+                    </div>
+                    
+                    <widget name="web_ribbon" title="Critical" bg_color="bg-danger" invisible="priority != '3'"/>
+                    
+                    <div class="oe_title">
+                        <label for="name" string="Task Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g., Q1 Marketing Campaign" class="o_task_name"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Team Assignment">
+                            <field name="team_id" string="Assigned Team" required="1" options="{'no_create': True}"/>
+                            <field name="team_ids" string="Additional Members" widget="many2many_tags" domain="[('share', '=', False)]"/>
+                            <field name="priority" widget="priority" string="Priority Level"/>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" string="Project Tags"/>
+                        </group>
+                        <group string="Timeline">
+                            <field name="date_start" string="Kickoff Date" widget="date"/>
+                            <field name="date_deadline" string="Delivery Date" widget="date"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <!-- HIGH LEVEL TIME TRACKING -->
+                        <group string="Time &amp; Resources (For Tasks)">
+                            <label for="planned_hours" string="Planned Time"/>
+                            <div class="o_row">
+                                <field name="planned_hours" widget="float_time" class="oe_inline"/>
+                                <span class="oe_inline">
+                                    (<field name="task_progress" readonly="1" class="oe_inline" 
+                                            decoration-danger="task_progress &gt; 100"
+                                            decoration-muted="task_progress &lt;= 100"/>%)
+                                </span>
+                            </div>
+                            <field name="effective_hours" widget="float_time" string="Actual Time"/>
+                            <field name="remaining_hours" widget="float_time" string="Remaining" readonly="1"/>
+                            <field name="task_performance" widget="badge" string="Performance" readonly="1"
+                                help="Team performance indicator. Over Estimated (Green): Team finished faster. On Track (Yellow): Using 80-100% of planned time. Under Estimated (Red): Team taking more time."
+                                decoration-success="task_performance == 'over_estimated'"
+                                decoration-warning="task_performance == 'on_track'"
+                                decoration-danger="task_performance == 'under_estimated'"
+                                decoration-muted="task_performance == 'not_started'"/>
+                            <div class="o_row" invisible="planned_hours == 0">
+                                <field name="task_progress" widget="progressbar" nolabel="1"
+                                    options="{'hide_text': true, 'editable': false}"
+                                    class="flex-grow-1"/>
+                            </div>
+                        </group>
+                        
+                        <group string="Client Information">
+                            <field name="partner_id" string="Client/Stakeholder"/>
+                            <field name="partner_email" string="Stakeholder Email"/>
+                            <field name="partner_phone" string="Stakeholder Phone"/>
+                        </group>
+                    </group>
+                    
+                    <!-- CHANGE TRACKING - HIGH LEVEL -->
+                    <group string="📊 Planned Time Change Tracking" invisible="planned_hours_change_count == 0">
+                        <group>
+                            <field name="planned_hours_change_count" string="Changes Made" readonly="1"/>
+                            <field name="planned_hours_last_changed" string="Last Changed" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="planned_hours_changed_by" string="Changed By" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="📊 Project Overview" name="overview">
+                            <field name="description" widget="html" placeholder="Project objectives, scope, deliverables..." options="{'collaborative': true}"/>
+                        </page>
+                        
+                        <page string="👥 Work Distribution" name="work_items">
+                            <field name="subtask_ids" context="{'default_parent_task_id': id}">
+                                <list editable="top" decoration-success="is_done" decoration-warning="deadline and deadline &lt; current_date">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="is_done" widget="boolean_toggle" string="Complete"/>
+                                    <field name="name" string="Subtask"/>
+                                    <field name="user_ids" widget="many2many_tags" 
+                                        options="{'no_create': True}" 
+                                        string="Assigned to"
+                                        domain="[('share', '=', False)]"
+                                        required="1"/>
+                                    <field name="deadline" string="End Date"/>
+                                    <field name="description" string="Details" widget="html"
+                                        options="{'style-inline': true}"/>
+                                </list>
+                            </field>
+                        </page>
+                        
+                        <!-- <page string="✅ Checklist" name="milestones">
+                            <field name="checklist_items" 
+                                widget="html" 
+                                placeholder="Create your project milestones and checklist..."
+                                options="{'collaborative': true, 'resizable': true, 'safe': true}"/>
+                        </page> -->
+                        
+                        <!-- TEAM TIME LOGS -->
+                        <page string="⏱️ Team Time Logs" name="team_timesheets">
+                            <!-- ONLY Performance & Progress Bar - Calculated from table entries -->
+                            <group string="⏱️ Time &amp; Resources (For Subtasks)" col="2">
+                                <field name="timesheet_performance" widget="badge" string="Performance" readonly="1"
+                                    help="Calculated from sum of all team time log entries. Over Estimated (Green): Total logged less than planned.  On Track (Yellow): Using 80-100%. Under Estimated (Red): Total logged more than planned."
+                                    decoration-success="timesheet_performance == 'over_estimated'"
+                                    decoration-warning="timesheet_performance == 'on_track'"
+                                    decoration-danger="timesheet_performance == 'under_estimated'"
+                                    decoration-muted="timesheet_performance == 'not_started'"/>
+                                <div class="o_row">
+                                    <field name="timesheet_progress" widget="progressbar" nolabel="1"
+                                        options="{'hide_text': false, 'editable': false}"
+                                        class="flex-grow-1"/>
+                                </div>
+                            </group>
+                            
+                            
+                            <!-- TEAM TIME LOG TABLE -->
+                            <field name="timesheet_ids" context="{'default_task_id': id}">
+                                <list editable="bottom" 
+                                    decoration-bf="user_id == uid" 
+                                    decoration-success="status == 'done'" 
+                                    decoration-info="status == 'in_review'">
+                                    <field name="date" string="📅 Work Date"/>
+                                    <field name="user_id" widget="many2one_avatar_user" string="👤 Team Member"/>
+                                    <field name="subtask_id" 
+                                        string="📋 Subtask/Work Item" 
+                                        required="1"
+                                        options="{'no_open': True}"
+                                        domain="[('parent_task_id', '=', parent.id)]"
+                                        context="{'default_parent_task_id': parent.id}"/>
+                                    <field name="name" string="📝 Work Details" widget="html"
+                                        options="{'style-inline': true}"/>
+                                    <field name="status" string="📊 Status" widget="badge"
+                                        decoration-success="status == 'done'"
+                                        decoration-info="status == 'in_review'"
+                                        decoration-warning="status == 'in_progress'"/>
+                                    <field name="planned_hours" widget="float_time" string="⏰ Planned" sum="Total Planned"/>
+                                    <field name="unit_amount" widget="float_time" string="⏱️ Actual Logged" sum="Total Logged"/>
+                                    <field name="remaining_hours" widget="float_time" string="⏳ Remaining" sum="Total Remaining"
+                                        decoration-danger="remaining_hours &lt; 0"
+                                        decoration-success="remaining_hours &gt;= 0"/>
+                                    <button name="action_edit_time_log" type="object" string="✏️ Edit" icon="fa-edit" class="btn-link"/>
+                                </list>
+                            </field>
+                            <div class="alert alert-info mb-3" role="alert">
+                                <strong>📋 Team Time Logging:</strong> 
+                                <ul class="mb-0">
+                                    <li>Each team member logs time with individual Planned and Actual hours</li>
+                                    <li>Performance and Progress are calculated from <strong>sum of all team entries below</strong></li>
+                                    <li>Subtask is required - create new subtasks directly from the dropdown</li>
+                                    <li>Track work status: In Progress, In Review, or Done</li>
+                                </ul>
+                            </div>
+                        </page>
+                        
+                        <page string="📁 Resources" name="resources">
+                            <group>
+                                <field name="notes" 
+                                    widget="html" 
+                                    string="Resource Links &amp; Documentation" 
+                                    placeholder="Add links to project documents, repositories, design files, meeting notes, etc." 
+                                    options="{'collaborative': true, 'resizable': true, 'safe': true}"/>
+                            </group>
+                        </page>
+                        
+                        <!-- HISTORY TABS -->
+                        <!-- <page string="📜 Planned Time History" name="planned_history" invisible="not planned_hours_history">
+                            <group>
+                                <field name="planned_hours_history" widget="text" readonly="1" nolabel="1"/>
+                            </group>
+                        </page> -->
+                        
+                        <!-- <page string="📜 Subtasks Planned History" name="timesheet_history" invisible="not timesheet_planned_history">
+                            <group>
+                                <field name="timesheet_planned_history" widget="text" readonly="1" nolabel="1"/>
+                            </group>
+                        </page> -->
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Individual Task List View -->
+    <record id="view_individual_task_list" model="ir.ui.view">
+        <field name="name">individual.task.list</field>
+        <field name="model">task.management</field>
+        <field name="arch" type="xml">
+            <list string="My Tasks" 
+                decoration-danger="date_deadline and date_deadline &lt; current_date and stage_id.is_closed == False" 
+                decoration-success="stage_id.is_closed == True" 
+                decoration-muted="kanban_state == 'blocked'">
+                <field name="sequence" widget="handle"/>
+                <field name="priority" widget="priority" nolabel="1"/>
+                <field name="create_uid" optional="show" string="Created By"/>
+                <field name="user_id" string="Delegate To" optional="show"/>
+                <field name="name" string="Task"/>
+                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                <field name="date_start" string="Start Date" optional="show" widget="date"/>
+                <field name="date_deadline" string="End Date" optional="show" widget="date"/>
+                <field name="stage_id" string="Status"/>
+                <field name="task_progress" widget="progressbar" string="Task Progress %" optional="show"/>
+                <field name="task_performance" widget="badge" string="Task Performance" optional="show"
+                    decoration-success="task_performance == 'over_estimated'"
+                    decoration-warning="task_performance == 'on_track'"
+                    decoration-danger="task_performance == 'under_estimated'"/>
+                <field name="timesheet_progress" widget="progressbar" string="Log Progress %" optional="show"/>
+                <field name="timesheet_performance" widget="badge" string="Log Performance" optional="show"
+                    decoration-success="timesheet_performance == 'over_estimated'"
+                    decoration-warning="timesheet_performance == 'on_track'"
+                    decoration-danger="timesheet_performance == 'under_estimated'"/>
+                <field name="kanban_state" widget="state_selection" nolabel="1" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Team Task List View -->
+    <record id="view_team_task_list" model="ir.ui.view">
+        <field name="name">team.task.list</field>
+        <field name="model">task.management</field>
+        <field name="arch" type="xml">
+            <list string="Team Tasks" sample="1" 
+                decoration-danger="priority == '3'" 
+                decoration-warning="date_deadline and date_deadline &lt; current_date and not is_closed" 
+                decoration-success="is_closed">
+                <field name="priority" widget="priority" nolabel="1"/>
+                <field name="name" string="Task Name"/>
+                <field name="team_id" string="Team"/>
+                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
+                <field name="date_start" string="Start" optional="show" widget="date"/>
+                <field name="date_deadline" string="Deadline" widget="date" width="120px"/>
+                <field name="stage_id" string="Phase" width="120px" optional="show"/>
+                <field name="task_progress" widget="progressbar" string="Task Progress %" optional="show"/>
+                <field name="task_performance" widget="badge" string="Task Performance" optional="show"
+                    decoration-success="task_performance == 'over_estimated'"
+                    decoration-warning="task_performance == 'on_track'"
+                    decoration-danger="task_performance == 'under_estimated'"/>
+                <field name="timesheet_progress" widget="progressbar" string="Log Progress %" optional="show"/>
+                <field name="timesheet_performance" widget="badge" string="Log Performance" optional="show"
+                    decoration-success="timesheet_performance == 'over_estimated'"
+                    decoration-warning="timesheet_performance == 'on_track'"
+                    decoration-danger="timesheet_performance == 'under_estimated'"/>
+                <field name="is_closed" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- All Tasks List View -->
+    <record id="view_all_tasks_list" model="ir.ui.view">
+        <field name="name">all.tasks.list</field>
+        <field name="model">task.management</field>
+        <field name="arch" type="xml">
+            <list string="All Tasks" create="false"
+                decoration-danger="date_deadline and date_deadline &lt; current_date and not is_closed" 
+                decoration-success="is_closed"
+                decoration-warning="priority == '2'"
+                decoration-bf="priority == '3'"
+                decoration-muted="not active">
+                <header>
+                    <button name="action_open_my_tasks" type="object" string="➕ Create Personal Task" class="btn-primary" icon="fa-user"/>
+                    <button name="action_open_team_tasks" type="object" string="➕ Create Team Task" class="btn-secondary" icon="fa-users"/>
+                </header>
+                <field name="priority" widget="priority" nolabel="1"/>
+                <field name="name" string="📋 Task Name" class="text-bf"/>
+                <field name="task_type" string="Type" widget="badge" decoration-info="task_type == 'individual'" decoration-warning="task_type == 'team'"/>
+                <field name="user_id" widget="many2one_avatar_user" string="👤 Owner" invisible="task_type != 'individual'"/>
+                <field name="team_id" string="👥 Team" invisible="task_type != 'team'" widget="badge" decoration-primary="True"/>
+                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" string="🏷️ Tags"/>
+                <field name="stage_id" string="📊 Stage" widget="badge" 
+                    decoration-info="stage_id.name == 'To-Do'"
+                    decoration-warning="stage_id.name == 'In Progress'"
+                    decoration-primary="stage_id.name == 'Review'"
+                    decoration-success="stage_id.name == 'Done'"/>
+                <field name="date_deadline" widget="remaining_days" string="📅 Deadline"/>
+                <!-- <field name="progress" widget="progressbar" string="Progress" options="{'editable': false}"/> -->
+                <field name="kanban_state" widget="state_selection" nolabel="1" optional="show"/>
+                <field name="is_closed" invisible="1"/>
+                <field name="active" invisible="1"/>
+                <field name="task_category" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_task_management_search" model="ir.ui.view">
+        <field name="name">task.management.search</field>
+        <field name="model">task.management</field>
+        <field name="arch" type="xml">
+            <search string="Search Tasks">
+                <field name="name" string="Task" filter_domain="['|', ('name', 'ilike', self), ('description', 'ilike', self)]"/>
+                <field name="user_id"/>
+                <field name="team_id"/>
+                <field name="stage_id"/>
+                <field name="tag_ids"/>
+                <separator/>
+                <!-- Core Filters -->
+                <filter string="Created by Me" 
+                        name="my_tasks" 
+                        domain="[('create_uid', '=', uid)]"/>
+                
+                <filter string="Delegated to Me" 
+                        name="delegated_to_me" 
+                        domain="[('user_id', '=', uid)]"/>
+                
+                <filter string="My Subtask Assignments" 
+                        name="my_subtasks" 
+                        domain="[('subtask_ids.user_ids', 'in', uid)]"/>
+                
+                <filter string="Delegated by Me" 
+                        name="delegated_by_me"
+                        domain="[('create_uid', '=', uid), ('user_id', '!=', False), ('user_id', '!=', uid)]"
+                        help="Tasks I created and assigned to others"/>
+                <filter string="Team Tasks" 
+                        name="team_tasks" 
+                        domain="[('task_type', '=', 'team')]"/>
+                <filter string="High Priority" 
+                        name="high_priority" 
+                        domain="[('priority', 'in', ['2', '3'])]"/>
+                
+                <separator/>
+                <!-- Status Filters -->
+                <filter string="Active" 
+                        name="active" 
+                        domain="[('active', '=', True)]"/>
+                
+                <filter string="Open Tasks" 
+                        name="open_tasks" 
+                        domain="[('stage_id.is_closed', '=', False)]"/>
+                
+                <filter string="Done Tasks" 
+                        name="closed_tasks" 
+                        domain="[('stage_id.is_closed', '=', True)]"/>
+                
+                <separator/>
+                <filter string="Overdue" name="overdue" 
+                        domain="[('date_deadline', '&lt;', context_today().strftime('%Y-%m-%d')), ('stage_id.is_closed', '=', False)]"/>
+                
+                <!-- Task Analysis -->
+                <group expand="1" string="📊 Task Analysis" name="task_analysis">
+                    <filter string="Date" 
+                            name="group_by_date" 
+                            context="{'group_by': 'date_deadline'}"/>
+                </group>
+                <!-- Grouping -->
+                <group expand="0" string="Group By">
+                    <filter string="Total Task Count" name="group_by_task_category" context="{'group_by': 'task_category'}" help="Group tasks by Created by Me, Delegated by Me, or Other Tasks"/>
+                    <separator/>
+                    <filter string="Team" name="group_by_team" context="{'group_by': 'team_id'}"/>
+                    <filter string="Stage" name="group_by_stage" context="{'group_by': 'stage_id'}"/>
+                    <filter string="Created By" name="group_by_creator" context="{'group_by': 'create_uid'}"/>
+                    <filter string="Assigned To" name="group_by_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Priority" name="group_by_priority" context="{'group_by': 'priority'}"/>
+                    <separator/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

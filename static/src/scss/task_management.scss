@@ -1,0 +1,122 @@
+/* Task Management Custom Styles */
+
+.o_task_form {
+    .o_task_name {
+        font-size: 1.5rem;
+        font-weight: 500;
+    }
+    
+    .oe_title {
+        margin-bottom: 20px;
+    }
+}
+
+/* Time Status Badges */
+.o_field_badge {
+    &[data-value="under_budget"] {
+        background-color: #28a745 !important;
+        color: white;
+    }
+    
+    &[data-value="on_track"] {
+        background-color: #17a2b8 !important;
+        color: white;
+    }
+    
+    &[data-value="over_budget"] {
+        background-color: #ffc107 !important;
+        color: #212529;
+    }
+    
+    &[data-value="time_critical"] {
+        background-color: #dc3545 !important;
+        color: white;
+    }
+    
+    &[data-value="not_started"] {
+        background-color: #6c757d !important;
+        color: white;
+    }
+}
+
+/* Time Completion Progress Bars */
+.o_kanban_record_progressbar {
+    .progress {
+        height: 20px;
+        margin-top: 8px;
+        background-color: #e9ecef;
+        
+        .progress-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: width 0.3s ease;
+        }
+    }
+}
+
+/* Alert Styling */
+.alert {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    
+    strong {
+        font-weight: 600;
+    }
+    
+    ul {
+        margin-bottom: 0;
+        margin-top: 8px;
+    }
+}
+
+/* Time Status in List Views */
+.o_list_view {
+    .o_data_cell {
+        &[name="time_completion"] {
+            font-weight: 500;
+        }
+        
+        &[name="remaining_hours"] {
+            &.text-danger {
+                color: #dc3545 !important;
+                font-weight: 600;
+            }
+            
+            &.text-success {
+                color: #28a745 !important;
+            }
+        }
+    }
+}
+
+/* Fix list view column spacing */
+.o_list_view {
+    th.o_list_number_th {
+        min-width: 120px;
+    }
+    
+    td.o_list_date,
+    th.o_column_sortable[data-name="date_start"],
+    th.o_column_sortable[data-name="date_deadline"],
+    th.o_column_sortable[data-name="stage_id"] {
+        min-width: 110px;
+        padding-right: 15px;
+    }
+}
+
+/* Percentage Pie Widget Styling */
+.o_field_percentpie {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+/* Budget Variance Display */
+.o_row {
+    .oe_inline {
+        display: inline-block;
+        margin-right: 5px;
+    }
+}
