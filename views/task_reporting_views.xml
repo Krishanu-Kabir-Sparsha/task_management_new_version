@@ -41,6 +41,7 @@
                   decoration-success="is_closed == True">
                 <field name="task_id" invisible="1"/>
                 <field name="name" string="Task"/>
+                <field name="subtask_name" optional="show"/>
                 <field name="task_type" widget="badge"
                        decoration-info="task_type == 'individual'"
                        decoration-warning="task_type == 'team'"/>
@@ -74,6 +75,7 @@
             <search string="Task Analysis">
                 <!-- Search Fields -->
                 <field name="name" string="Task" filter_domain="[('name', 'ilike', self)]"/>
+                <field name="subtask_name" string="Subtask" filter_domain="[('subtask_name', 'ilike', self)]"/>
                 <field name="user_id"/>
                 <field name="team_id"/>
                 <field name="stage_id"/>
@@ -115,6 +117,8 @@
                 <group expand="0" string="Group By">
                     <filter string="Assigned To" name="group_user" context="{'group_by': 'user_id'}"/>
                     <filter string="Team" name="group_team" context="{'group_by': 'team_id'}"/>
+                    <filter string="Task" name="group_task" context="{'group_by': 'task_id'}"/>
+                    <filter string="Subtask" name="group_subtask" context="{'group_by': 'subtask_id'}"/>
                     <filter string="Task Type" name="group_type" context="{'group_by': 'task_type'}"/>
                     <separator/>
                     <filter string="Stage" name="group_stage" context="{'group_by': 'stage_id'}"/>
@@ -135,13 +139,10 @@
         <field name="name">📊 Task Analysis</field>
         <field name="res_model">task.report</field>
         <field name="view_mode">pivot,graph,list</field>
-        <field name="context">{
-            'search_default_open': 1,
-            'search_default_this_month': 1
-        }</field>
+        <field name="context">{}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                No tasks to analyze yet!  
+                No tasks to analyze yet! 
             </p>
             <p>
                 Analyze task workload, time tracking, and performance:
@@ -267,12 +268,10 @@
         <field name="name">⏱️ Time Log Summary</field>
         <field name="res_model">timesheet.report</field>
         <field name="view_mode">pivot,graph,list</field>
-        <field name="context">{
-            'search_default_this_month': 1
-        }</field>
+        <field name="context">{}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                No time logs yet! 
+                No time logs yet!
             </p>
             <p>
                 Analyze time logging and workload:

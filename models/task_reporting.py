@@ -9,7 +9,7 @@ class TaskReport(models.Model):
     _description = 'Task Analysis Report'
     _auto = False
     _rec_name = 'task_id'
-    _order = 'date_start desc'
+    _order = 'date desc'
 
     # Core Task Information
     task_id = fields.Many2one('task.management', string='Task', readonly=True)
@@ -18,6 +18,10 @@ class TaskReport(models.Model):
         ('individual', 'Individual Task'),
         ('team', 'Team Task')
     ], string='Task Type', readonly=True)
+    
+    # Subtask Information
+    subtask_id = fields.Many2one('task.subtask', string='Subtask', readonly=True)
+    subtask_name = fields.Char(string='Subtask Name', readonly=True)
     
     # Assignment
     user_id = fields.Many2one('res.users', string='Assigned To', readonly=True)
@@ -75,10 +79,12 @@ class TaskReport(models.Model):
         query = """
             CREATE OR REPLACE VIEW %s AS (
                 SELECT
-                    t.id as id,
+                    ROW_NUMBER() OVER (ORDER BY t.id, st.id) as id,
                     t.id as task_id,
                     t.name as name,
                     t.task_type as task_type,
+                    st.id as subtask_id,
+                    st.name as subtask_name,
                     t.user_id as user_id,
                     t.team_id as team_id,
                     t.create_uid as create_uid,
@@ -121,6 +127,7 @@ class TaskReport(models.Model):
                     
                 FROM task_management t
                 LEFT JOIN task_stage ts ON t.stage_id = ts.id
+                LEFT JOIN task_subtask st ON st.parent_task_id = t.id
                 WHERE t.active = True
             )
         """ % self._table
