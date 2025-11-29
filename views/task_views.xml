@@ -193,10 +193,9 @@
                                     <field name="name" string="📝 Description" required="1" 
                                         widget="html" 
                                         options="{'style-inline': true}"/>
-                                    <field name="status" string="📊 Status" widget="badge"
-                                        decoration-success="status == 'done'"
-                                        decoration-info="status == 'in_review'"
-                                        decoration-warning="status == 'in_progress'"/>
+                                    <field name="status" string="📊 Status" 
+                                            widget="selection"
+                                            options="{'no_open': True, 'no_create': True}"/>
                                     <field name="planned_hours" widget="float_time" string="⏰ Planned Time" sum="Total Planned"/>
                                     <field name="unit_amount" widget="float_time" string="⏱️ Actual Time Logged" required="1" sum="Total Logged"/>
                                     <field name="remaining_hours" widget="float_time" string="⏳ Remaining" sum="Total Remaining"
@@ -404,10 +403,9 @@
                                         context="{'default_parent_task_id': parent.id}"/>
                                     <field name="name" string="📝 Work Details" widget="html"
                                         options="{'style-inline': true}"/>
-                                    <field name="status" string="📊 Status" widget="badge"
-                                        decoration-success="status == 'done'"
-                                        decoration-info="status == 'in_review'"
-                                        decoration-warning="status == 'in_progress'"/>
+                                    <field name="status" string="📊 Status" 
+                                            widget="selection"
+                                            options="{'no_open': True, 'no_create': True}"/>
                                     <field name="planned_hours" widget="float_time" string="⏰ Planned" sum="Total Planned"/>
                                     <field name="unit_amount" widget="float_time" string="⏱️ Actual Logged" sum="Total Logged"/>
                                     <field name="remaining_hours" widget="float_time" string="⏳ Remaining" sum="Total Remaining"

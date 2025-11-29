@@ -31,6 +31,7 @@ A comprehensive task management system with:
         'views/task_team_views.xml',
         'views/task_views.xml',
         'views/task_kanban_views.xml',
+        'views/task_wizard_views.xml',
         'views/task_calendar_views.xml',
         'views/task_activity_views.xml',
         'views/task_reporting_views.xml',
@@ -42,6 +43,7 @@ A comprehensive task management system with:
     'assets': {
         'web.assets_backend': [
             'task_management/static/src/scss/task_management.scss',
+            'task_management/static/src/css/task_kanban.css',
             # 'task_management/static/src/js/task_widget.js',
             
         ],

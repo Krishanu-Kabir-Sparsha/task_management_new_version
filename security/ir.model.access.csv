@@ -19,3 +19,6 @@ access_task_report_user,task.report.user,model_task_report,task_management.group
 access_task_report_manager,task.report.manager,model_task_report,task_management.group_task_manager,1,0,0,0
 access_timesheet_report_user,timesheet.report.user,model_timesheet_report,task_management.group_task_user,1,0,0,0
 access_timesheet_report_manager,timesheet.report.manager,model_timesheet_report,task_management.group_task_manager,1,0,0,0
+access_task_cover_image_wizard_user,task.cover.image.wizard.user,model_task_cover_image_wizard,task_management.group_task_user,1,1,1,1
+access_task_share_wizard_user,task.share.wizard.user,model_task_share_wizard,task_management.group_task_user,1,1,1,1
+access_ir_attachment_task_user,ir.attachment.task.user,base.model_ir_attachment,task_management.group_task_user,1,1,1,1

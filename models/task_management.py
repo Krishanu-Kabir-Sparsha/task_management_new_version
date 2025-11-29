@@ -34,7 +34,7 @@ class TaskManagement(models.Model):
     active = fields.Boolean(default=True, string='Active')
     sequence = fields.Integer(string='Sequence', default=10)
     color = fields.Integer(string='Color Index', default=0)
-    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env. company)
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
     
     # Task Type - to distinguish between individual and team tasks
     task_type = fields.Selection([
@@ -318,6 +318,13 @@ class TaskManagement(models.Model):
         'ir.attachment',
         domain="[('res_model', '=', 'task.management'), ('res_id', '=', id), ('mimetype', 'ilike', 'image')]",
         string='Cover Image'
+    )
+
+    # Add this computed field for direct image access
+    cover_image = fields.Binary(
+        string='Cover Image Binary',
+        related='displayed_image_id.datas',
+        readonly=True
     )
     
     # Customer/Partner
@@ -672,6 +679,46 @@ class TaskManagement(models.Model):
             'target': 'current',
         }
     
+    def action_set_cover_image(self):
+        """Open wizard to set cover image"""
+        self.ensure_one()
+        return {
+            'name': 'Set Cover Image',
+            'type': 'ir.actions.act_window',
+            'res_model': 'task.cover.image.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_task_id': self.id},
+        }
+
+    def action_share_task(self):
+        """Open share wizard"""
+        self.ensure_one()
+        return {
+            'name': 'Share Task',
+            'type': 'ir.actions.act_window',
+            'res_model': 'task.share.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_task_id': self.id},
+        }
+
+    def action_duplicate_task(self):
+        """Duplicate task"""
+        self.ensure_one()
+        default = {
+            'name': f"{self.name} (Copy)",
+        }
+        new_task = self.copy(default)
+        return {
+            'name': 'Duplicated Task',
+            'type': 'ir.actions.act_window',
+            'res_model': 'task.management',
+            'res_id': new_task.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
+    
     # ========== CRUD METHODS ==========
     
     @api.model
@@ -784,7 +831,7 @@ class TaskManagement(models.Model):
         for task in self:
             template.send_mail(task.id, force_send=True)
             task.message_post(
-                body=_('Task is overdue.  Notification sent to %s') % task.user_id.name,
+                body=_('Task is overdue. Notification sent to %s') % task.user_id.name,
                 message_type='notification',
             )
 

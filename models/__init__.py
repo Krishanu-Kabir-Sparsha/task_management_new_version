@@ -10,3 +10,5 @@ from . import task_timesheet_line
 from . import task_recurrence
 from . import task_template
 from . import task_reporting
+from . import task_cover_image_wizard
+from . import task_share_wizard

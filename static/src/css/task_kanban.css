@@ -1,0 +1,187 @@
+/* ================================================
+   TASK MANAGEMENT KANBAN VIEW STYLES
+   ================================================ */
+
+/* Base Card Styling */
+.o_kanban_view .oe_kanban_card {
+    position: relative;
+    margin-bottom: 8px;
+    border-radius: 3px;
+}
+
+.o_kanban_view .oe_kanban_card .oe_kanban_content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ================================================
+   COVER IMAGE - DYNAMIC HEIGHT
+   ================================================ */
+.o_kanban_view .oe_kanban_card .o_kanban_cover_image {
+    width: 100%;
+    max-height: 150px;
+    min-height: 80px;
+    overflow: hidden;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.o_kanban_view .oe_kanban_card .o_kanban_cover_image img {
+    width: 100%;
+    height: auto;
+    max-height: 150px;
+    object-fit: cover;
+    display: block;
+}
+
+/* ================================================
+   CARD CONTENT AREA
+   ================================================ */
+.o_kanban_view .oe_kanban_card .o_kanban_card_content {
+    padding: 10px;
+}
+
+/* ================================================
+   TOP SECTION - TITLE & DROPDOWN
+   ================================================ */
+.o_kanban_view .oe_kanban_card .o_kanban_record_top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.o_kanban_view .oe_kanban_card .o_kanban_record_headings {
+    flex: 1;
+    min-width: 0;
+    padding-right: 8px;
+}
+
+.o_kanban_view .oe_kanban_card .o_kanban_record_title {
+    display: block;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 1.3;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.o_kanban_view .oe_kanban_card .o_kanban_record_subtitle {
+    font-size: 12px;
+    color: #6c757d;
+    line-height: 1.2;
+}
+
+/* ================================================
+   DROPDOWN MENU
+   ================================================ */
+.o_kanban_view .oe_kanban_card .o_dropdown_kanban {
+    flex-shrink: 0;
+}
+
+.o_kanban_view .oe_kanban_card .o_dropdown_kanban .btn {
+    padding: 2px 6px;
+    background: transparent;
+    border: none;
+}
+
+.o_kanban_view .oe_kanban_card .o_dropdown_kanban .fa-ellipsis-v {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.o_kanban_view .oe_kanban_card .o_dropdown_kanban:hover .fa-ellipsis-v {
+    color: #212529;
+}
+
+/* Dropdown Menu Items */
+.o_kanban_view .oe_kanban_card .dropdown-menu {
+    min-width: 180px;
+    padding: 4px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border: 1px solid rgba(0,0,0,0.15);
+}
+
+.o_kanban_view .oe_kanban_card .dropdown-menu .dropdown-item {
+    padding: 6px 16px;
+    font-size: 13px;
+}
+
+.o_kanban_view .oe_kanban_card .dropdown-divider {
+    margin: 4px 0;
+}
+
+/* ================================================
+   COLOR PICKER IN DROPDOWN
+   ================================================ */
+.o_kanban_view .oe_kanban_card .oe_kanban_colorpicker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 8px;
+    max-width: 160px;
+    list-style: none;
+    margin: 0;
+}
+
+.o_kanban_view .oe_kanban_card .oe_kanban_colorpicker > li {
+    width: 18px;
+    height: 18px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.o_kanban_view .oe_kanban_card .oe_kanban_colorpicker > li:hover {
+    transform: scale(1.1);
+}
+
+/* ================================================
+   TAGS SECTION
+   ================================================ */
+.o_kanban_view .oe_kanban_card .o_kanban_record_body {
+    margin-bottom: 8px;
+    min-height: 20px;
+}
+
+/* ================================================
+   BOTTOM SECTION
+   ================================================ */
+.o_kanban_view .oe_kanban_card .o_kanban_record_bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 8px;
+    border-top: 1px solid #e9ecef;
+}
+
+.o_kanban_view .oe_kanban_card .oe_kanban_bottom_left,
+.o_kanban_view .oe_kanban_card .oe_kanban_bottom_right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.o_kanban_view .oe_kanban_card .o_kanban_date {
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.o_kanban_view .oe_kanban_card .o_kanban_date .fa-clock-o {
+    font-size: 11px;
+}
+
+/* ================================================
+   RESPONSIVE
+   ================================================ */
+@media (max-width: 768px) {
+    .o_kanban_view .oe_kanban_card .o_kanban_cover_image {
+        max-height: 120px;
+    }
+}

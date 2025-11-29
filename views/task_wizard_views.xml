@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Cover Image Wizard -->
+    <record id="view_task_cover_image_wizard_form" model="ir.ui.view">
+        <field name="name">task.cover.image.wizard.form</field>
+        <field name="model">task.cover.image.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Set Cover Image">
+                <sheet>
+                    <group>
+                        <field name="task_id" invisible="1"/>
+                        <field name="cover_image" widget="image" class="oe_avatar" options="{'size': [400, 300]}"/>
+                        <field name="cover_image_filename" invisible="1"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Set Cover" class="btn-primary" type="object" name="action_set_cover"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Share Task Wizard -->
+    <record id="view_task_share_wizard_form" model="ir.ui.view">
+        <field name="name">task.share.wizard.form</field>
+        <field name="model">task.share.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Share Task">
+                <sheet>
+                    <group>
+                        <field name="task_id" invisible="1"/>
+                        <field name="user_ids" widget="many2many_tags" placeholder="Select users to share with..."/>
+                        <field name="message" placeholder="Add a message..."/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Share" class="btn-primary" type="object" name="action_share"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
